@@ -6,7 +6,8 @@ stored as `level.dat` and a LevelDB database under `db/`. Back up existing world
 before opening them with the game.
 
 ```sh
-./build/bin/vinecraft --world worlds/MyWorld --resource-pack path/to/resource-pack.zip
+v .
+./vinecraft --world worlds/MyWorld --resource-pack path/to/resource-pack.zip
 ```
 
 A procedural built-in resource pack is used when no pack is supplied. Additional
@@ -30,14 +31,11 @@ git clone https://github.com/theoparis/v-leveldb.git ~/.vmodules/leveldb
 Build and run the V tests:
 
 ```sh
-make -j2
-make test
-./build/bim/vinecraft --help
-sh tests/smoke.sh ./build/bin/vinecraft /tmp
+v .
+v test .
+./vinecraft --help
+sh tests/smoke.sh ./vinecraft /tmp
 ```
-
-Set `BUILD_DIR` to use another disposable build directory (default `build`), or `V`
-to select the V compiler. `make clean` removes the executable and that build directory.
 
 ## Playing
 
