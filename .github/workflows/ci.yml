@@ -28,8 +28,8 @@ jobs:
           git clone https://github.com/theoparis/v-leveldb.git "$HOME/.vmodules/leveldb"
           git -C "$HOME/.vmodules/leveldb" checkout b58971f703c9a3468e19b3388e02cfa7c58bbb65
       - name: Build
-        run: make -j2
+        run: v .
       - name: Test
-        run: make test
+        run: v test .
       - name: Run Sokol smoke check
-        run: sh tests/smoke.sh ./build/bin/vinecraft "$RUNNER_TEMP"
+        run: sh tests/smoke.sh ./vinecraft "$RUNNER_TEMP"
