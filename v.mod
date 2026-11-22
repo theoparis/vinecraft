@@ -1,5 +1,5 @@
 Module {
-	name: 'deepslate'
+	name: 'vinecraft'
 	description: 'Single-player Bedrock-style voxel game'
 	version: '0.1.0'
 	dependencies: ['leveldb']

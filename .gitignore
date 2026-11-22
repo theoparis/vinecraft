@@ -1,4 +1,7 @@
-build/
+/vinecraft
+/tools/worldmap/worldmap
+/tools/bench/bench
+/tools/packcheck/packcheck
 .cache/
 *.swp
 compile_commands.json

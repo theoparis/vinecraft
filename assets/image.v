@@ -3,7 +3,7 @@ module assets
 import stbi
 import os
 
-#include "@VMODROOT/vinecraft/assets/png_memory.h"
+#include "@VMODROOT/assets/png_memory.h"
 
 fn C.stbi_write_png_to_mem(pixels &u8, stride_bytes int, x int, y int, n int, out_len &int) &u8
 fn C.stbi__callback_free(ptr voidptr)
