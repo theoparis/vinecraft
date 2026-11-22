@@ -21,7 +21,6 @@ jobs:
       - name: Install V and LevelDB
         run: |
           git clone https://github.com/vlang/v.git "$HOME/v"
-          git -C "$HOME/v" checkout e140fd7247ec5a72113d665348f856902fa30bb3
           make -C "$HOME/v"
           echo "$HOME/v" >> "$GITHUB_PATH"
           mkdir -p "$HOME/.vmodules"
