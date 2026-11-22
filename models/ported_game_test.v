@@ -7,16 +7,16 @@ fn test_ported_baked_block_geometry_and_missing_fallback() {
 	mut packs := &assets.PackStack{}
 	packs.add_builtin_fallback()
 	mut reg := blocks.new_registry()
-	mut models := new_block_models(packs, reg, 256)
+	mut bm := new_block_models(packs, reg, 256)
 	for name in ['stone', 'grass_block', 'short_grass', 'torch', 'water', 'air'] {
-		models.bake(reg.find(name))
+		bm.bake(reg.find(name))
 	}
-	stone := models.baked(reg.find('stone')) or { panic('stone not baked') }
-	grass := models.baked(reg.find('grass_block')) or { panic('grass not baked') }
-	plant := models.baked(reg.find('short_grass')) or { panic('plant not baked') }
-	torch := models.baked(reg.find('torch')) or { panic('torch not baked') }
-	water := models.baked(reg.find('water')) or { panic('water not baked') }
-	air := models.baked(reg.find('air')) or { panic('air not baked') }
+	stone := bm.baked(reg.find('stone')) or { panic('stone not baked') }
+	grass := bm.baked(reg.find('grass_block')) or { panic('grass not baked') }
+	plant := bm.baked(reg.find('short_grass')) or { panic('plant not baked') }
+	torch := bm.baked(reg.find('torch')) or { panic('torch not baked') }
+	water := bm.baked(reg.find('water')) or { panic('water not baked') }
+	air := bm.baked(reg.find('air')) or { panic('air not baked') }
 	assert stone.quads.len == 6 && !stone.missing
 	assert grass.quads.len == 10 && !grass.missing
 	mut tinted := 0
@@ -27,8 +27,8 @@ fn test_ported_baked_block_geometry_and_missing_fallback() {
 	assert water.quads.len == 0
 	assert air.quads.len == 0
 	future := reg.lookup_or_register('minecraft:some_future_block', [])
-	models.bake(future)
-	missing := models.baked(future) or { panic('missing block not baked') }
+	bm.bake(future)
+	missing := bm.baked(future) or { panic('missing block not baked') }
 	assert missing.missing && missing.quads.len == 6
 	assert missing.quads[0].layer == 0
 }
@@ -62,13 +62,13 @@ fn test_ported_rotated_log_and_stairs_models() {
 	packs.add_builtin_fallback()
 	mut reg := blocks.new_registry()
 	log_x := ported_model_state(mut reg, 'oak_log', 'pillar_axis', 'x')
-	mut models := new_block_models(packs, reg, 256)
-	models.bake(log_x)
-	models.bake(reg.find('oak_log'))
-	x_log := models.baked(log_x) or { panic('x log not baked') }
-	y_log := models.baked(reg.find('oak_log')) or { panic('y log not baked') }
-	top := models.layer_of('block/oak_log_top')
-	side := models.layer_of('block/oak_log')
+	mut bm := new_block_models(packs, reg, 256)
+	bm.bake(log_x)
+	bm.bake(reg.find('oak_log'))
+	x_log := bm.baked(log_x) or { panic('x log not baked') }
+	y_log := bm.baked(reg.find('oak_log')) or { panic('y log not baked') }
+	top := bm.layer_of('block/oak_log_top')
+	side := bm.layer_of('block/oak_log')
 	assert ported_layer_for_direction(y_log, up) == top
 	assert ported_layer_for_direction(x_log, east) == top
 	assert ported_layer_for_direction(x_log, up) == side
@@ -80,10 +80,10 @@ fn test_ported_rotated_log_and_stairs_models() {
 		blocks.StateEntry{ key: 'weirdo_direction', value: blocks.state_int_value(2) },
 		blocks.StateEntry{ key: 'upside_down_bit', value: blocks.state_byte(0) },
 	])
-	models.bake(stairs_e)
-	models.bake(stairs_s)
-	e := models.baked(stairs_e) or { panic('east stairs not baked') }
-	s := models.baked(stairs_s) or { panic('south stairs not baked') }
+	bm.bake(stairs_e)
+	bm.bake(stairs_s)
+	e := bm.baked(stairs_e) or { panic('east stairs not baked') }
+	s := bm.baked(stairs_s) or { panic('south stairs not baked') }
 	mut e_min_x := f32(1)
 	mut s_min_x := f32(1)
 	mut s_min_z := f32(1)
@@ -114,13 +114,13 @@ fn test_ported_wall_torch_models_and_selection_shape() {
 	east_id := ported_model_state(mut reg, 'torch', 'torch_facing_direction', 'east')
 	west_id := ported_model_state(mut reg, 'torch', 'torch_facing_direction', 'west')
 	south_id := ported_model_state(mut reg, 'torch', 'torch_facing_direction', 'south')
-	mut models := new_block_models(packs, reg, 256)
-	models.bake(east_id)
-	models.bake(south_id)
-	models.bake(reg.find('torch'))
-	east_torch := models.baked(east_id) or { panic('east torch not baked') }
-	south_torch := models.baked(south_id) or { panic('south torch not baked') }
-	standing := models.baked(reg.find('torch')) or { panic('standing torch not baked') }
+	mut bm := new_block_models(packs, reg, 256)
+	bm.bake(east_id)
+	bm.bake(south_id)
+	bm.bake(reg.find('torch'))
+	east_torch := bm.baked(east_id) or { panic('east torch not baked') }
+	south_torch := bm.baked(south_id) or { panic('south torch not baked') }
+	standing := bm.baked(reg.find('torch')) or { panic('standing torch not baked') }
 	assert !east_torch.missing && east_torch.quads.len == 6
 	mut top_x := f32(0)
 	mut bottom_x := f32(1)
@@ -159,11 +159,11 @@ fn test_ported_weighted_variants_from_pack() {
 	})
 	packs.add_builtin_fallback()
 	reg := blocks.new_registry()
-	mut models := new_block_models(packs, reg, 256)
-	models.bake(reg.find('stone'))
-	models.bake(reg.find('dirt'))
-	stone := models.baked(reg.find('stone')) or { panic('stone not baked') }
-	dirt := models.baked(reg.find('dirt')) or { panic('dirt not baked') }
+	mut bm := new_block_models(packs, reg, 256)
+	bm.bake(reg.find('stone'))
+	bm.bake(reg.find('dirt'))
+	stone := bm.baked(reg.find('stone')) or { panic('stone not baked') }
+	dirt := bm.baked(reg.find('dirt')) or { panic('dirt not baked') }
 	assert stone.alts.len == 4 && stone.total_weight == 5
 	assert stone.alts[1].weight == 2
 	assert stone.quads.len == 6 && !stone.missing
