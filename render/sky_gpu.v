@@ -45,8 +45,8 @@ fn sky_image(packs &assets.PackStack, path string) gfx.Image {
 
 pub fn new_sky_gpu(packs &assets.PackStack) SkyGpu {
 	mut ds := gfx.ShaderDesc{}
-	ds.vs.source = &char(dome_vs.str)
-	ds.fs.source = &char(dome_fs.str)
+	set_stage_source(mut ds.vs, dome_vs, dome_vs_msl)
+	set_stage_source(mut ds.fs, dome_fs, dome_fs_msl)
 	ds.fs.uniform_blocks[0].size = 96
 	for i, name in [c'forward_tan', c'right_aspect', c'up_glow', c'zenith', c'horizon', c'sun'] {
 		unsafe { ds.fs.uniform_blocks[0].uniforms[i] = gfx.ShaderUniformDesc{ name: name, type: .float4 } }
@@ -54,8 +54,8 @@ pub fn new_sky_gpu(packs &assets.PackStack) SkyGpu {
 	dome_shader := gfx.make_shader(&ds)
 	dome := gfx.make_pipeline(&gfx.PipelineDesc{ shader: dome_shader })
 	mut qs := gfx.ShaderDesc{}
-	qs.vs.source = &char(sky_quad_vs.str)
-	qs.fs.source = &char(sky_quad_fs.str)
+	set_stage_source(mut qs.vs, sky_quad_vs, sky_quad_vs_msl)
+	set_stage_source(mut qs.fs, sky_quad_fs, sky_quad_fs_msl)
 	qs.vs.uniform_blocks[0].size = 64
 	qs.vs.uniform_blocks[0].uniforms[0] = gfx.ShaderUniformDesc{ name: c'vp', type: .mat4 }
 	qs.fs.images[0].used = true

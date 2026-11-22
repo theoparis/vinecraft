@@ -22,8 +22,8 @@ mut:
 
 pub fn new_world_gpu(tile int, layers int, pixels []u8, animation []f32) WorldGpu {
 	mut desc := gfx.ShaderDesc{}
-	desc.vs.source = &char(world_vs.str)
-	desc.fs.source = &char(world_fs.str)
+	set_stage_source(mut desc.vs, world_vs, world_vs_msl)
+	set_stage_source(mut desc.fs, world_fs, world_fs_msl)
 	desc.vs.uniform_blocks[0].size = 80
 	desc.vs.uniform_blocks[0].uniforms[0] = gfx.ShaderUniformDesc{ name: c'u_vp', type: .mat4 }
 	desc.vs.uniform_blocks[0].uniforms[1] = gfx.ShaderUniformDesc{ name: c'u_offset', type: .float4 }

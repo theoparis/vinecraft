@@ -205,7 +205,7 @@ pub fn run(opt cli.Options) int {
 	block_models.build()
 	mut rt := &Runtime{ game: game, packs: packs, models: block_models }
 	sapp.run(
-		window_title:        c'Deepslate Edition'
+		window_title:        c'Vinecraft'
 		width:               opt.width
 		height:              opt.height
 		fullscreen:          opt.fullscreen

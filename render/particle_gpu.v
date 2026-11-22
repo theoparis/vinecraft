@@ -14,8 +14,8 @@ mut:
 
 pub fn new_particle_gpu() ParticleGpu {
 	mut sd := gfx.ShaderDesc{}
-	sd.vs.source = &char(particle_vs.str)
-	sd.fs.source = &char(particle_fs.str)
+	set_stage_source(mut sd.vs, particle_vs, particle_vs_msl)
+	set_stage_source(mut sd.fs, particle_fs, particle_fs_msl)
 	sd.vs.uniform_blocks[0].size = 64
 	sd.vs.uniform_blocks[0].uniforms[0] = gfx.ShaderUniformDesc{ name: c'vp', type: .mat4 }
 	sd.fs.uniform_blocks[0].size = 32

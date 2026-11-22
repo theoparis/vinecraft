@@ -19,8 +19,12 @@ mut:
 
 fn ui_pipeline(array bool) (gfx.Shader, gfx.Pipeline) {
 	mut desc := gfx.ShaderDesc{}
-	desc.vs.source = &char(ui_vs.str)
-	desc.fs.source = if array { &char(ui_array_fs.str) } else { &char(ui_fs.str) }
+	set_stage_source(mut desc.vs, ui_vs, ui_vs_msl)
+	if array {
+		set_stage_source(mut desc.fs, ui_array_fs, ui_array_fs_msl)
+	} else {
+		set_stage_source(mut desc.fs, ui_fs, ui_fs_msl)
+	}
 	desc.vs.uniform_blocks[0].size = 8
 	desc.vs.uniform_blocks[0].uniforms[0].name = c'u_size'
 	desc.vs.uniform_blocks[0].uniforms[0].type = .float2

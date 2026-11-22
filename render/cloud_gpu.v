@@ -15,8 +15,8 @@ mut:
 
 pub fn new_cloud_gpu() CloudGpu {
 	mut sd := gfx.ShaderDesc{}
-	sd.vs.source = &char(cloud_vs.str)
-	sd.fs.source = &char(cloud_fs.str)
+	set_stage_source(mut sd.vs, cloud_vs, cloud_vs_msl)
+	set_stage_source(mut sd.fs, cloud_fs, cloud_fs_msl)
 	sd.vs.uniform_blocks[0].size = 80
 	sd.vs.uniform_blocks[0].uniforms[0] = gfx.ShaderUniformDesc{ name: c'vp', type: .mat4 }
 	sd.vs.uniform_blocks[0].uniforms[1] = gfx.ShaderUniformDesc{ name: c'offset', type: .float4 }

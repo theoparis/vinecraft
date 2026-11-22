@@ -66,7 +66,7 @@ pub fn draw_ui(mut ui render.Ui, mut g Game, mut block_models models.BlockModels
 			dirs := ['south (+Z)', 'west (-X)', 'north (-Z)', 'east (+X)']!
 			direction := int(math.floor(math.fmod(g.player_state.yaw * 180 / math.pi + 3645, 360) / 90)) & 3
 			mut lines := [
-				'Deepslate Edition 0.1 (${g.fps:.0f} fps, ${g.frame_ms:.1f} ms)',
+				'Vinecraft 0.1 (${g.fps:.0f} fps, ${g.frame_ms:.1f} ms)',
 				'XYZ: ${p.x:.3f} / ${p.y:.3f} / ${p.z:.3f}',
 				'Block: ${bx} ${by} ${bz}  Chunk: ${lx} ${lz} in ${cx} ${cz}',
 				'Facing: ${dirs[direction]}  Biome id: ${biome}',
