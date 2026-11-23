@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "assets/block_models.hpp"
-#include "game/player.hpp"
 #include "game/block_updates.hpp"
+#include "game/player.hpp"
 #include "game/raycast.hpp"
 #include "render/clouds.hpp"
 #include "render/particles.hpp"
@@ -18,16 +18,16 @@
 namespace ds {
 
 struct Options {
-  std::vector<std::string> packs;   // resource packs, highest priority first
+  std::vector<std::string> packs; // resource packs, highest priority first
   std::string world_dir = "worlds/DeepslateWorld";
   std::optional<i64> seed;
   int render_distance = 10;
-  int threads = 0;                  // 0 = auto
+  int threads = 0; // 0 = auto
   int width = 1280, height = 720;
   bool fullscreen = false;
   bool vsync = true;
   // Automation / testing
-  std::string script;               // ";"-separated actions, see Game::run_script_action
+  std::string script; // ";"-separated actions, see Game::run_script_action
   std::optional<Eigen::Vector3d> start_pos;
   std::optional<float> start_yaw_deg, start_pitch_deg;
   std::optional<i64> start_time;
@@ -37,18 +37,18 @@ struct Options {
 };
 
 class Game {
- public:
+public:
   explicit Game(Options o) : opt_(std::move(o)) {}
   ~Game();
   int run();
 
- private:
+private:
   enum class Screen { Loading, Playing, Inventory, Pause };
 
-  bool init_window(std::string* err);
-  bool init_content(std::string* err);
+  bool init_window(std::string *err);
+  bool init_content(std::string *err);
   void shutdown();
-  void handle_event(const void* sdl_event);
+  void handle_event(const void *sdl_event);
   void update(double dt);
   void render();
   void draw_hud(int w, int h);
@@ -60,19 +60,19 @@ class Game {
   void break_block();
   void place_block();
   void pick_block();
-  BlockId placement_state(BlockId base, const RayHit& hit) const;
+  BlockId placement_state(BlockId base, const RayHit &hit) const;
   void select_slot(int i);
   std::string block_display(BlockId id) const;
   void save_all(bool wait);
-  void take_screenshot(const std::string& path);
+  void take_screenshot(const std::string &path);
   void place_player_at_spawn();
   bool run_script_action();
   bool world_settled() const;
   void build_creative_list();
 
   Options opt_;
-  void* window_ = nullptr;       // SDL_Window*
-  void* gl_context_ = nullptr;   // SDL_GLContext
+  void *window_ = nullptr;     // SDL_Window*
+  void *gl_context_ = nullptr; // SDL_GLContext
   int fb_w_ = 1280, fb_h_ = 720;
   bool running_ = true;
 
@@ -140,4 +140,4 @@ class Game {
   double idle_deadline_ = 0;
 };
 
-}  // namespace ds
+} // namespace ds

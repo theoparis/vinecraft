@@ -10,10 +10,12 @@
 namespace ds {
 
 class ThreadPool {
- public:
+public:
   explicit ThreadPool(unsigned n) {
-    if (n == 0) n = 1;
-    for (unsigned i = 0; i < n; i++) workers_.emplace_back([this, i](std::stop_token st) { run(st, i); });
+    if (n == 0)
+      n = 1;
+    for (unsigned i = 0; i < n; i++)
+      workers_.emplace_back([this, i](std::stop_token st) { run(st, i); });
   }
   ~ThreadPool() {
     {
@@ -21,11 +23,12 @@ class ThreadPool {
       stopping_ = true;
     }
     cv_.notify_all();
-    for (auto& w : workers_) w.request_stop();
-    workers_.clear();  // joins
+    for (auto &w : workers_)
+      w.request_stop();
+    workers_.clear(); // joins
   }
-  ThreadPool(const ThreadPool&) = delete;
-  ThreadPool& operator=(const ThreadPool&) = delete;
+  ThreadPool(const ThreadPool &) = delete;
+  ThreadPool &operator=(const ThreadPool &) = delete;
 
   void submit(int priority, std::function<void()> fn) {
     {
@@ -40,12 +43,14 @@ class ThreadPool {
   }
   size_t size() const { return workers_.size(); }
 
- private:
+private:
   struct Job {
     int prio;
     u64 seq;
     std::function<void()> fn;
-    bool operator<(const Job& o) const { return prio != o.prio ? prio > o.prio : seq > o.seq; }
+    bool operator<(const Job &o) const {
+      return prio != o.prio ? prio > o.prio : seq > o.seq;
+    }
   };
   void run(std::stop_token, unsigned) {
     for (;;) {
@@ -53,9 +58,11 @@ class ThreadPool {
       {
         std::unique_lock lk(m_);
         cv_.wait(lk, [&] { return stopping_ || !q_.empty(); });
-        if (stopping_ && q_.empty()) return;
-        if (stopping_) return;
-        j = std::move(const_cast<Job&>(q_.top()));
+        if (stopping_ && q_.empty())
+          return;
+        if (stopping_)
+          return;
+        j = std::move(const_cast<Job &>(q_.top()));
         q_.pop();
       }
       j.fn();
@@ -69,4 +76,4 @@ class ThreadPool {
   std::vector<std::jthread> workers_;
 };
 
-}  // namespace ds
+} // namespace ds

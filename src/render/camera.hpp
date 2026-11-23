@@ -6,17 +6,18 @@
 
 namespace ds {
 
-// Minecraft conventions: yaw 0 looks toward +Z (south), yaw 90 toward -X (west);
-// positive pitch looks down.
+// Minecraft conventions: yaw 0 looks toward +Z (south), yaw 90 toward -X
+// (west); positive pitch looks down.
 struct Camera {
   Eigen::Vector3d pos{0, 80, 0};
-  float yaw = 0, pitch = 0;   // radians
-  float fovy = 1.2217f;       // 70 degrees
+  float yaw = 0, pitch = 0; // radians
+  float fovy = 1.2217f;     // 70 degrees
   float aspect = 16.0f / 9.0f;
   float znear = 0.05f, zfar = 600.0f;
 
   Eigen::Vector3f forward() const {
-    return {-std::sin(yaw) * std::cos(pitch), -std::sin(pitch), std::cos(yaw) * std::cos(pitch)};
+    return {-std::sin(yaw) * std::cos(pitch), -std::sin(pitch),
+            std::cos(yaw) * std::cos(pitch)};
   }
   // View matrix without translation (the world is drawn camera-relative).
   Eigen::Matrix4f view_rot() const {
@@ -44,10 +45,14 @@ struct Camera {
   struct Frustum {
     std::array<Eigen::Vector4f, 6> planes;
     // Box given in camera-relative coordinates.
-    bool intersects(const Eigen::Vector3f& mn, const Eigen::Vector3f& mx) const {
-      for (auto& p : planes) {
-        Eigen::Vector3f v(p.x() > 0 ? mx.x() : mn.x(), p.y() > 0 ? mx.y() : mn.y(), p.z() > 0 ? mx.z() : mn.z());
-        if (p.x() * v.x() + p.y() * v.y() + p.z() * v.z() + p.w() < 0) return false;
+    bool intersects(const Eigen::Vector3f &mn,
+                    const Eigen::Vector3f &mx) const {
+      for (auto &p : planes) {
+        Eigen::Vector3f v(p.x() > 0 ? mx.x() : mn.x(),
+                          p.y() > 0 ? mx.y() : mn.y(),
+                          p.z() > 0 ? mx.z() : mn.z());
+        if (p.x() * v.x() + p.y() * v.y() + p.z() * v.z() + p.w() < 0)
+          return false;
       }
       return true;
     }
@@ -57,9 +62,10 @@ struct Camera {
     Frustum f;
     Eigen::Vector4f r0 = m.row(0), r1 = m.row(1), r2 = m.row(2), r3 = m.row(3);
     f.planes = {r3 + r0, r3 - r0, r3 + r1, r3 - r1, r3 + r2, r3 - r2};
-    for (auto& p : f.planes) p /= p.head<3>().norm();
+    for (auto &p : f.planes)
+      p /= p.head<3>().norm();
     return f;
   }
 };
 
-}  // namespace ds
+} // namespace ds

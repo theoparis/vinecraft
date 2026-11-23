@@ -8,10 +8,12 @@ namespace ds {
 
 struct Image {
   int w = 0, h = 0;
-  std::vector<u8> rgba;  // 4 bytes per pixel
+  std::vector<u8> rgba; // 4 bytes per pixel
   bool empty() const { return w == 0 || h == 0; }
-  u8* px(int x, int y) { return &rgba[(static_cast<size_t>(y) * w + x) * 4]; }
-  const u8* px(int x, int y) const { return &rgba[(static_cast<size_t>(y) * w + x) * 4]; }
+  u8 *px(int x, int y) { return &rgba[(static_cast<size_t>(y) * w + x) * 4]; }
+  const u8 *px(int x, int y) const {
+    return &rgba[(static_cast<size_t>(y) * w + x) * 4];
+  }
   static Image make(int w, int h) {
     Image i;
     i.w = w;
@@ -22,7 +24,7 @@ struct Image {
 };
 
 std::optional<Image> decode_png(std::span<const u8> bytes);
-std::vector<u8> encode_png(const Image& img);
-bool write_png_file(const std::string& path, const Image& img);
+std::vector<u8> encode_png(const Image &img);
+bool write_png_file(const std::string &path, const Image &img);
 
-}  // namespace ds
+} // namespace ds

@@ -11,8 +11,10 @@ namespace ds {
 
 std::optional<Image> decode_png(std::span<const u8> bytes) {
   int w, h, n;
-  u8* data = stbi_load_from_memory(bytes.data(), static_cast<int>(bytes.size()), &w, &h, &n, 4);
-  if (!data) return std::nullopt;
+  u8 *data = stbi_load_from_memory(bytes.data(), static_cast<int>(bytes.size()),
+                                   &w, &h, &n, 4);
+  if (!data)
+    return std::nullopt;
   Image img;
   img.w = w;
   img.h = h;
@@ -21,17 +23,20 @@ std::optional<Image> decode_png(std::span<const u8> bytes) {
   return img;
 }
 
-std::vector<u8> encode_png(const Image& img) {
+std::vector<u8> encode_png(const Image &img) {
   int len = 0;
-  u8* p = stbi_write_png_to_mem(img.rgba.data(), img.w * 4, img.w, img.h, 4, &len);
-  if (!p) return {};
+  u8 *p =
+      stbi_write_png_to_mem(img.rgba.data(), img.w * 4, img.w, img.h, 4, &len);
+  if (!p)
+    return {};
   std::vector<u8> out(p, p + len);
   STBIW_FREE(p);
   return out;
 }
 
-bool write_png_file(const std::string& path, const Image& img) {
-  return stbi_write_png(path.c_str(), img.w, img.h, 4, img.rgba.data(), img.w * 4) != 0;
+bool write_png_file(const std::string &path, const Image &img) {
+  return stbi_write_png(path.c_str(), img.w, img.h, 4, img.rgba.data(),
+                        img.w * 4) != 0;
 }
 
-}  // namespace ds
+} // namespace ds

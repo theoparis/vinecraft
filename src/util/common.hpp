@@ -31,35 +31,52 @@ using i64 = std::int64_t;
 // ---------------------------------------------------------------- logging
 enum class LogLevel { Debug, Info, Warn, Error };
 
-inline std::mutex& log_mutex() {
+inline std::mutex &log_mutex() {
   static std::mutex m;
   return m;
 }
 
-inline LogLevel& log_threshold() {
+inline LogLevel &log_threshold() {
   static LogLevel l = LogLevel::Info;
   return l;
 }
 
 template <class... A>
-void log(LogLevel lvl, std::format_string<A...> fmt, A&&... args) {
-  if (lvl < log_threshold()) return;
-  static constexpr const char* names[] = {"debug", "info", "warn", "error"};
+void log(LogLevel lvl, std::format_string<A...> fmt, A &&...args) {
+  if (lvl < log_threshold())
+    return;
+  static constexpr const char *names[] = {"debug", "info", "warn", "error"};
   std::string msg = std::format(fmt, std::forward<A>(args)...);
   std::lock_guard lk(log_mutex());
   std::fprintf(stderr, "[%s] %s\n", names[static_cast<int>(lvl)], msg.c_str());
 }
-template <class... A> void log_info(std::format_string<A...> f, A&&... a) { log(LogLevel::Info, f, std::forward<A>(a)...); }
-template <class... A> void log_warn(std::format_string<A...> f, A&&... a) { log(LogLevel::Warn, f, std::forward<A>(a)...); }
-template <class... A> void log_error(std::format_string<A...> f, A&&... a) { log(LogLevel::Error, f, std::forward<A>(a)...); }
-template <class... A> void log_debug(std::format_string<A...> f, A&&... a) { log(LogLevel::Debug, f, std::forward<A>(a)...); }
+template <class... A> void log_info(std::format_string<A...> f, A &&...a) {
+  log(LogLevel::Info, f, std::forward<A>(a)...);
+}
+template <class... A> void log_warn(std::format_string<A...> f, A &&...a) {
+  log(LogLevel::Warn, f, std::forward<A>(a)...);
+}
+template <class... A> void log_error(std::format_string<A...> f, A &&...a) {
+  log(LogLevel::Error, f, std::forward<A>(a)...);
+}
+template <class... A> void log_debug(std::format_string<A...> f, A &&...a) {
+  log(LogLevel::Debug, f, std::forward<A>(a)...);
+}
 
 // ---------------------------------------------------------------- math
-constexpr int floor_div(int a, int b) { int q = a / b; return (a % b != 0 && ((a < 0) != (b < 0))) ? q - 1 : q; }
-constexpr int floor_mod(int a, int b) { int r = a % b; return (r != 0 && ((r < 0) != (b < 0))) ? r + b : r; }
+constexpr int floor_div(int a, int b) {
+  int q = a / b;
+  return (a % b != 0 && ((a < 0) != (b < 0))) ? q - 1 : q;
+}
+constexpr int floor_mod(int a, int b) {
+  int r = a % b;
+  return (r != 0 && ((r < 0) != (b < 0))) ? r + b : r;
+}
 inline int ifloor(float f) { return static_cast<int>(std::floor(f)); }
 inline int ifloor(double f) { return static_cast<int>(std::floor(f)); }
-template <class T> constexpr T clampv(T v, T lo, T hi) { return v < lo ? lo : (v > hi ? hi : v); }
+template <class T> constexpr T clampv(T v, T lo, T hi) {
+  return v < lo ? lo : (v > hi ? hi : v);
+}
 constexpr float lerp(float a, float b, float t) { return a + (b - a) * t; }
 
 // ---------------------------------------------------------------- hashing
@@ -77,7 +94,9 @@ constexpr u64 hash_coords(u64 seed, i64 x, i64 y, i64 z) {
   return h;
 }
 // [0,1) float from a hash.
-constexpr float hash_unit(u64 h) { return static_cast<float>(h >> 40) * (1.0f / 16777216.0f); }
+constexpr float hash_unit(u64 h) {
+  return static_cast<float>(h >> 40) * (1.0f / 16777216.0f);
+}
 
 // Tiny deterministic PRNG (xoshiro-ish via splitmix state).
 struct Rng {
@@ -85,7 +104,9 @@ struct Rng {
   explicit constexpr Rng(u64 seed) : s(seed) {}
   constexpr u64 next() { return mix64(s += 0x9E3779B97F4A7C15ull); }
   constexpr float unit() { return hash_unit(next()); }
-  constexpr int range(int lo, int hi) { return lo + static_cast<int>(next() % static_cast<u64>(hi - lo + 1)); }
+  constexpr int range(int lo, int hi) {
+    return lo + static_cast<int>(next() % static_cast<u64>(hi - lo + 1));
+  }
   constexpr bool chance(float p) { return unit() < p; }
 };
 
@@ -98,9 +119,14 @@ inline double now_seconds() {
 // Packs a chunk column position into a single key.
 struct ChunkPos {
   i32 x = 0, z = 0;
-  constexpr bool operator==(const ChunkPos&) const = default;
+  constexpr bool operator==(const ChunkPos &) const = default;
 };
-constexpr u64 pack_chunk(ChunkPos p) { return (static_cast<u64>(static_cast<u32>(p.x)) << 32) | static_cast<u32>(p.z); }
-struct ChunkPosHash { size_t operator()(ChunkPos p) const noexcept { return mix64(pack_chunk(p)); } };
+constexpr u64 pack_chunk(ChunkPos p) {
+  return (static_cast<u64>(static_cast<u32>(p.x)) << 32) |
+         static_cast<u32>(p.z);
+}
+struct ChunkPosHash {
+  size_t operator()(ChunkPos p) const noexcept { return mix64(pack_chunk(p)); }
+};
 
-}  // namespace ds
+} // namespace ds

@@ -11,23 +11,24 @@
 namespace ds {
 
 struct SkyState {
-  float sky_light = 1.0f;         // 0 (night) .. 1 (day): scales sky light on world geometry
+  float sky_light =
+      1.0f; // 0 (night) .. 1 (day): scales sky light on world geometry
   float fog_color[3] = {0.7f, 0.8f, 1.0f};
   float fog_start = 100, fog_end = 160;
-  float anim_tick = 0;            // animated-texture clock (20 ticks per second)
+  float anim_tick = 0; // animated-texture clock (20 ticks per second)
   bool underwater = false;
 };
 
 class WorldRenderer {
- public:
-  WorldRenderer(World& world, BlockModels& models, ThreadPool& pool);
+public:
+  WorldRenderer(World &world, BlockModels &models, ThreadPool &pool);
   ~WorldRenderer();
-  bool init(std::string* err);
+  bool init(std::string *err);
 
   // Schedules meshing jobs and uploads finished meshes. `radius` is in chunks.
-  void update(const Camera& cam, int radius);
-  void draw_opaque(const Camera& cam, const SkyState& sky);
-  void draw_translucent(const Camera& cam, const SkyState& sky);
+  void update(const Camera &cam, int radius);
+  void draw_opaque(const Camera &cam, const SkyState &sky);
+  void draw_translucent(const Camera &cam, const SkyState &sky);
   GLuint atlas_texture() const { return atlas_; }
   // True when no meshing work is queued, running or waiting to be uploaded.
   bool idle() const;
@@ -37,13 +38,13 @@ class WorldRenderer {
     u64 meshed = 0;
   } stats;
 
- private:
+private:
   struct SecKey {
     int x, y, z;
-    bool operator==(const SecKey&) const = default;
+    bool operator==(const SecKey &) const = default;
   };
   struct SecHash {
-    size_t operator()(const SecKey& k) const noexcept {
+    size_t operator()(const SecKey &k) const noexcept {
       return static_cast<size_t>(hash_coords(0x5EC, k.x, k.y, k.z));
     }
   };
@@ -62,21 +63,24 @@ class WorldRenderer {
   };
 
   void upload_atlas();
-  void upload_mesh(GpuMesh& m, const std::vector<Vertex>& v);
-  void free_mesh(GpuMesh& m);
-  void draw_pass(const Camera& cam, const SkyState& sky, bool translucent);
+  void upload_mesh(GpuMesh &m, const std::vector<Vertex> &v);
+  void free_mesh(GpuMesh &m);
+  void draw_pass(const Camera &cam, const SkyState &sky, bool translucent);
   void ensure_index_buffer(size_t quads);
 
-  World& world_;
-  BlockModels& models_;
-  ThreadPool& pool_;
+  World &world_;
+  BlockModels &models_;
+  ThreadPool &pool_;
   GLuint program_ = 0, atlas_ = 0, ibo_ = 0, anim_tex_ = 0;
-  GLint u_viewproj_ = -1, u_offset_ = -1, u_fog_color_ = -1, u_fog_start_ = -1, u_fog_end_ = -1, u_sky_ = -1, u_cut_ = -1, u_tex_ = -1, u_anim_ = -1, u_tick_ = -1;
+  GLint u_viewproj_ = -1, u_offset_ = -1, u_fog_color_ = -1, u_fog_start_ = -1,
+        u_fog_end_ = -1, u_sky_ = -1, u_cut_ = -1, u_tex_ = -1, u_anim_ = -1,
+        u_tick_ = -1;
   size_t uploaded_layers_ = 0;
   size_t ibo_quads_ = 0;
 
   std::unordered_map<SecKey, Section, SecHash> sections_;
-  std::unordered_map<u64, u32> pending_;  // chunk -> section mask still to be meshed
+  std::unordered_map<u64, u32>
+      pending_; // chunk -> section mask still to be meshed
   std::mutex results_m_;
   std::vector<Result> results_;
   std::atomic<int> jobs_{0};
@@ -84,4 +88,4 @@ class WorldRenderer {
   bool backlog_ = false;
 };
 
-}  // namespace ds
+} // namespace ds

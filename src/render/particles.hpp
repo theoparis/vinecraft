@@ -11,15 +11,15 @@ namespace ds {
 
 // Small textured billboards: block-break debris.
 class Particles {
- public:
+public:
   ~Particles();
-  bool init(BlockModels& models, GLuint atlas, std::string* err);
-  void emit_break(BlockId id, int x, int y, int z, Rng& rng);
-  void update(double dt, const World& world);
-  void draw(const Camera& cam, const SkyState& sky);
+  bool init(BlockModels &models, GLuint atlas, std::string *err);
+  void emit_break(BlockId id, int x, int y, int z, Rng &rng);
+  void update(double dt, const World &world);
+  void draw(const Camera &cam, const SkyState &sky);
   size_t count() const { return list_.size(); }
 
- private:
+private:
   struct P {
     Eigen::Vector3d pos, vel;
     float life, size;
@@ -27,11 +27,13 @@ class Particles {
     u16 layer;
     float r, g, b;
   };
-  struct V { float x, y, z, u, v, layer, r, g, b, a; };
-  BlockModels* models_ = nullptr;
+  struct V {
+    float x, y, z, u, v, layer, r, g, b, a;
+  };
+  BlockModels *models_ = nullptr;
   GLuint atlas_ = 0, prog_ = 0, vao_ = 0, vbo_ = 0;
   std::vector<P> list_;
   std::vector<V> verts_;
 };
 
-}  // namespace ds
+} // namespace ds
