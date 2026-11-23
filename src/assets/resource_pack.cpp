@@ -1,4 +1,5 @@
 #include "assets/resource_pack.hpp"
+#include "assets/client_jar.hpp"
 
 #include <archive.h>
 #include <archive_entry.h>
@@ -166,7 +167,11 @@ std::optional<std::string> download_pack(const std::string& url, std::string* er
 
 bool PackStack::add_spec(const std::string& spec, std::string* err) {
   std::string path = spec;
-  if (spec.starts_with("http://") || spec.starts_with("https://")) {
+  if (spec.starts_with("minecraft:")) {
+    auto p = download_client_jar(spec.substr(10), err);
+    if (!p) return false;
+    path = *p;
+  } else if (spec.starts_with("http://") || spec.starts_with("https://")) {
     auto p = download_pack(spec, err);
     if (!p) return false;
     path = *p;

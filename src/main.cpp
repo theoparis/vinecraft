@@ -2,6 +2,7 @@
 #include <cstring>
 #include <iostream>
 
+#include "assets/client_jar.hpp"
 #include "assets/resource_pack.hpp"
 #include "game/game.hpp"
 
@@ -11,7 +12,9 @@ void usage() {
   std::cout << R"(Deepslate Edition - single-player Bedrock-style voxel game (C++26)
 
 Usage: deepslate [options]
-  --resource-pack <zip|dir|url>  Resource pack in Java/official layout (assets/minecraft/...).
+  --resource-pack <zip|dir|url|minecraft:ver>
+                                 Resource pack in Java/official layout (assets/minecraft/...),
+                                 or minecraft:<version|latest|snapshot> to fetch client.jar.
                                  May be given several times; earlier packs win. A built-in
                                  procedural pack is always used as the lowest layer.
   --world <dir>                  Bedrock world directory (level.dat + db/). Created if missing.
@@ -34,6 +37,7 @@ Usage: deepslate [options]
   --frames <n>                   Exit after n frames
   --no-save                      Do not write anything to the world
   --write-builtin-pack <zip>     Write the built-in resource pack as a .zip and exit
+  --download-client <ver>        Download Minecraft client.jar (latest, snapshot, or version id) and exit
   --verbose                      Debug logging
   --help
 
@@ -48,6 +52,7 @@ F2 screenshot, F11 fullscreen, -/= render distance, PgUp/PgDn time of day, T fre
 int main(int argc, char** argv) {
   ds::Options opt;
   std::string export_pack;
+  std::string download_client_ver;
   for (int i = 1; i < argc; i++) {
     std::string a = argv[i];
     auto next = [&](const char* what) -> const char* {
@@ -74,6 +79,7 @@ int main(int argc, char** argv) {
     else if (a == "--frames") opt.max_frames = std::atoi(next("--frames"));
     else if (a == "--no-save") opt.no_save = true;
     else if (a == "--write-builtin-pack") export_pack = next("--write-builtin-pack");
+    else if (a == "--download-client") download_client_ver = next("--download-client");
     else if (a == "--verbose") { opt.verbose = true; ds::log_threshold() = ds::LogLevel::Debug; }
     else { std::cerr << "unknown option " << a << " (see --help)\n"; return 2; }
   }
@@ -81,6 +87,13 @@ int main(int argc, char** argv) {
     std::string err;
     if (!ds::export_builtin_pack_zip(export_pack, &err)) { std::cerr << "error: " << err << "\n"; return 1; }
     std::cout << "wrote " << export_pack << "\n";
+    return 0;
+  }
+  if (!download_client_ver.empty()) {
+    std::string err;
+    auto path = ds::download_client_jar(download_client_ver, &err);
+    if (!path) { std::cerr << "error: " << err << "\n"; return 1; }
+    std::cout << *path << "\n";
     return 0;
   }
   ds::Game game(std::move(opt));

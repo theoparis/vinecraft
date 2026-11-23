@@ -128,6 +128,43 @@ else()
   set(DS_FASTNOISE_TARGET FastNoise)
 endif()
 
+# ---------------------------------------------------------------- BoringSSL
+# Built in-tree and preferred over system OpenSSL so curl and libarchive share
+# the same TLS/crypto implementation without relying on host OpenSSL.
+function(ds_dep_boringssl)
+  if(DEEPSLATE_SYSTEM_DEPS)
+    find_package(OpenSSL QUIET)
+    if(OpenSSL_FOUND)
+      return()
+    endif()
+  endif()
+  FetchContent_Declare(boringssl
+    GIT_REPOSITORY https://github.com/google/boringssl.git
+    GIT_TAG 0.20261105.0 GIT_SHALLOW ON)
+  FetchContent_MakeAvailable(boringssl)
+  if(NOT TARGET OpenSSL::SSL)
+    add_library(OpenSSL::SSL ALIAS ssl)
+  endif()
+  if(NOT TARGET OpenSSL::Crypto)
+    add_library(OpenSSL::Crypto ALIAS crypto)
+  endif()
+  set(OPENSSL_FOUND ON CACHE BOOL "" FORCE)
+  set(OpenSSL_FOUND ON CACHE BOOL "" FORCE)
+  set(OPENSSL_USE_STATIC_LIBS ON CACHE BOOL "" FORCE)
+  set(OPENSSL_INCLUDE_DIR "${boringssl_SOURCE_DIR}/include" CACHE PATH "" FORCE)
+  set(OPENSSL_SSL_LIBRARY ssl CACHE STRING "" FORCE)
+  set(OPENSSL_CRYPTO_LIBRARY crypto CACHE STRING "" FORCE)
+  set(OPENSSL_LIBRARIES "ssl;crypto" CACHE STRING "" FORCE)
+  set(OPENSSL_VERSION "1.1.1" CACHE STRING "" FORCE)
+  # curl's try_compile checks cannot link in-tree ALIAS targets before build; pin the BoringSSL answers.
+  set(HAVE_AWSLC OFF CACHE BOOL "" FORCE)
+  set(HAVE_BORINGSSL ON CACHE BOOL "" FORCE)
+  set(HAVE_LIBRESSL OFF CACHE BOOL "" FORCE)
+  set(HAVE_DES_ECB_ENCRYPT ON CACHE BOOL "" FORCE)
+  set(HAVE_SSL_SET0_WBIO ON CACHE BOOL "" FORCE)
+endfunction()
+ds_dep_boringssl()
+
 # ---------------------------------------------------------------- libarchive
 function(ds_dep_libarchive)
   if(DEEPSLATE_SYSTEM_DEPS)
@@ -138,10 +175,11 @@ function(ds_dep_libarchive)
       return()
     endif()
   endif()
-  foreach(o TEST TAR CPIO CAT UNZIP OPENSSL LIBB2 LZ4 LZO LZMA ZSTD BZip2 LIBXML2 EXPAT
+  foreach(o TEST TAR CPIO CAT UNZIP LIBB2 LZ4 LZO LZMA ZSTD BZip2 LIBXML2 EXPAT
             PCREPOSIX PCRE2POSIX ICONV ACL XATTR CNG MBEDTLS NETTLE)
     set(ENABLE_${o} OFF CACHE BOOL "" FORCE)
   endforeach()
+  set(ENABLE_OPENSSL ON CACHE BOOL "" FORCE)
   set(ENABLE_ZLIB ON CACHE BOOL "" FORCE)
   set(ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
   set(ENABLE_WERROR OFF CACHE BOOL "" FORCE)
@@ -184,7 +222,8 @@ function(ds_dep_curl)
   set(HTTP_ONLY ON CACHE BOOL "" FORCE)
   FetchContent_Declare(curl
     GIT_REPOSITORY https://github.com/curl/curl.git
-    GIT_TAG curl-8_22_0 GIT_SHALLOW ON)
+    GIT_TAG curl-8_22_0 GIT_SHALLOW ON
+    PATCH_COMMAND sed -i "s/list(APPEND CMAKE_REQUIRED_LIBRARIES Threads::Threads)//g" CMakeLists.txt)
   FetchContent_MakeAvailable(curl)
   add_library(ds_curl INTERFACE)
   target_link_libraries(ds_curl INTERFACE libcurl_static)

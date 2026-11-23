@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "assets/block_models.hpp"
+#include "assets/client_jar.hpp"
 #include "assets/image.hpp"
 #include "assets/resource_pack.hpp"
 #include "game/block_updates.hpp"
@@ -159,6 +160,68 @@ TEST(pack_zip_and_dir_roundtrip_and_layering) {
   CHECK(!bad.add_spec((dir / "missing.zip").string(), &err));
   std::ofstream(dir / "junk.zip") << "not a zip";
   CHECK(!bad.add_spec((dir / "junk.zip").string(), &err));
+  fs::remove_all(dir);
+}
+
+TEST(client_jar_manifest_and_sha1) {
+  static constexpr std::string_view kManifest = R"({
+    "latest": { "release": "26.3", "snapshot": "26.4-snapshot-10" },
+    "versions": [
+      { "id": "26.4-snapshot-10", "type": "snapshot", "url": "https://example.invalid/snap.json", "sha1": "aaa" },
+      { "id": "26.3", "type": "release", "url": "https://example.invalid/26.3.json", "sha1": "bbb" }
+    ]
+  })";
+  std::string err;
+
+  auto rel = parse_version_manifest(kManifest, "latest", &err);
+  CHECK(rel.has_value());
+  if (rel) {
+    CHECK_EQ(rel->id, std::string("26.3"));
+    CHECK_EQ(rel->type, std::string("release"));
+    CHECK_EQ(rel->url, std::string("https://example.invalid/26.3.json"));
+    CHECK_EQ(rel->sha1, std::string("bbb"));
+  }
+
+  auto snap = parse_version_manifest(kManifest, "snapshot", &err);
+  CHECK(snap.has_value());
+  if (snap) CHECK_EQ(snap->id, std::string("26.4-snapshot-10"));
+
+  auto exact = parse_version_manifest(kManifest, "26.3", &err);
+  CHECK(exact.has_value());
+  if (exact) CHECK_EQ(exact->url, std::string("https://example.invalid/26.3.json"));
+
+  CHECK(!parse_version_manifest(kManifest, "nonexistent", &err).has_value());
+  CHECK(!parse_version_manifest("{bad json", "latest", &err).has_value());
+
+  static constexpr std::string_view kVersionJson = R"({
+    "id": "26.3",
+    "downloads": {
+      "client": {
+        "sha1": "e877b6a07acd633fb3bb475002175cec036e7b87",
+        "size": 41483720,
+        "url": "https://example.invalid/client.jar"
+      }
+    }
+  })";
+  auto dl = parse_client_download(kVersionJson, &err);
+  CHECK(dl.has_value());
+  if (dl) {
+    CHECK_EQ(dl->url, std::string("https://example.invalid/client.jar"));
+    CHECK_EQ(dl->sha1, std::string("e877b6a07acd633fb3bb475002175cec036e7b87"));
+    CHECK_EQ(dl->size, u64{41483720});
+  }
+  CHECK(!parse_client_download("{}", &err).has_value());
+
+  // SHA-1 of "abc" is a9993e364706816aba3e25717850c26c9cd0d89d.
+  static constexpr u8 kAbc[] = {'a', 'b', 'c'};
+  CHECK_EQ(sha1_hex(kAbc), std::string("a9993e364706816aba3e25717850c26c9cd0d89d"));
+
+  fs::path dir = temp_dir("sha1");
+  fs::path f = dir / "sample.bin";
+  { std::ofstream out(f, std::ios::binary); out.write("abc", 3); }
+  auto fhash = sha1_file_hex(f, &err);
+  CHECK(fhash.has_value());
+  if (fhash) CHECK_EQ(*fhash, std::string("a9993e364706816aba3e25717850c26c9cd0d89d"));
   fs::remove_all(dir);
 }
 

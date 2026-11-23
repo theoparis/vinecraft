@@ -8,6 +8,7 @@ add_library(deepslate_core STATIC
   world/world.cpp
   assets/image.cpp
   assets/resource_pack.cpp
+  assets/client_jar.cpp
   assets/builtin_pack.cpp
   assets/fallback_font.cpp
   assets/block_models.cpp
@@ -24,7 +25,7 @@ add_library(deepslate_core STATIC
   game/game.cpp)
 target_include_directories(deepslate_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(deepslate_core PUBLIC ds_options leveldb ds_zlib simdjson::simdjson Eigen3::Eigen
-  ${DS_FASTNOISE_TARGET} ds_archive ds_curl SDL3::SDL3 ds_stb Threads::Threads)
+  ${DS_FASTNOISE_TARGET} ds_archive ds_curl OpenSSL::Crypto SDL3::SDL3 ds_stb Threads::Threads)
 
 add_executable(deepslate main.cpp)
 target_link_libraries(deepslate PRIVATE deepslate_core)
